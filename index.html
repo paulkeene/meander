@@ -49,13 +49,15 @@ line.link {
 <script>
 var width = 960,
     height = 500,
+    t_width = 80,
+    t_height = 80,
     root;
 
 var nodeCount = 1;
 
 var force = d3.layout.force()
-    .linkDistance(80)
-    .charge(-280)
+    .linkDistance(120)
+    .charge(-500)
     .gravity(.05)
     .friction(.85)
     .size([width, height])
@@ -106,19 +108,30 @@ function update() {
       .on("dblclick", dblclick)
       .call(force.drag);
 
-  nodeEnter.append("circle")
-      .attr("class", "logo")
-      .attr("r", "40");
+  nodeEnter.append("foreignObject")
+      .attr("width", t_width)
+      .attr("height", t_height)
+    .append("xhtml:div")
+      .style("width", t_width + "px")
+      .style("height", t_height + "px")
+      .style("border-radius", t_width + "px")
+      .style("-webkit-border-radius", t_width + "px")
+      .style("background", "url(http://placekitten.com/" + t_width + ") no-repeat")
+}
 
-  node.select("circle")
-      .style("fill", color);
+function link_x(x) {
+  return x + Math.floor(t_width / 2);
+}
+
+function link_y(y) {
+  return y + Math.floor(t_height / 2);
 }
 
 function tick() {
-  link.attr("x1", function(d) { return d.source.x; })
-      .attr("y1", function(d) { return d.source.y; })
-      .attr("x2", function(d) { return d.target.x; })
-      .attr("y2", function(d) { return d.target.y; });
+  link.attr("x1", function(d) { return link_x(d.source.x); })
+      .attr("y1", function(d) { return link_x(d.source.y); })
+      .attr("x2", function(d) { return link_x(d.target.x); })
+      .attr("y2", function(d) { return link_y(d.target.y); });
 
   node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 }
