@@ -118,12 +118,8 @@ d3.json("root.json", function(error, json) {
 });
 
 function update() {
-  console.log("UPDATE");
   var nodes = flatten(root),
       links = d3.layout.tree().links(nodes);
-
-  console.log("NODES:");
-  console.log(nodes);
 
   // Restart the force layout.
   force
@@ -155,7 +151,6 @@ function update() {
       .attr("height", t_height)
     .append("xhtml:div")
       .attr("class", "node-image")
-      //.style("background", "url(http://placekitten.com/" + t_width + ") no-repeat")
       .style("background", function(d) { return "url(" + thumbnail_url(d) + ") no-repeat"});
 }
 
@@ -187,6 +182,17 @@ function color(d) {
   return "#e05103";
 }
 
+function addChildrenAndUpdate(d, fileName) {
+  $.getJSON(fileName)
+    .done(function(data) {
+      for (var i = 0; i < 3; i++) {
+        data[i]["id"] = ++nodeCount;
+        d.children.push(data[i]);
+      }
+      update();
+    });
+}
+
 // Toggle children on dblclick.
 function dblclick(d) {
   if (d.children) {
@@ -196,32 +202,11 @@ function dblclick(d) {
 
   dblClickCount++;
   if (dblClickCount == 1) {
-    $.getJSON("first_expand.json")
-      .done(function(data) {
-        for (var i = 0; i < 3; i++) {
-          data[i]["id"] = ++nodeCount;
-          d.children.push(data[i]);
-          update();
-        }
-      });
+    addChildrenAndUpdate(d, "first_expand.json");
   } else if (dblClickCount == 2) {
-    $.getJSON("second_expand.json")
-      .done(function(data) {
-        for (var i = 0; i < 3; i++) {
-          data[i]["id"] = ++nodeCount;
-          d.children.push(data[i]);
-          update();
-        }
-      });
+    addChildrenAndUpdate(d, "second_expand.json");
   } else if (dblClickCount == 3) {
-    $.getJSON("third_expand.json")
-      .done(function(data) {
-        for (var i = 0; i < 3; i++) {
-          data[i]["id"] = ++nodeCount;
-          d.children.push(data[i]);
-          update();
-        }
-      });
+    addChildrenAndUpdate(d, "third_expand.json");
   } else {
     for (var i = 0; i < 3; i++) {
       d.children.push({"name": "Derp", "id": ++nodeCount});
@@ -245,7 +230,6 @@ function click(d) {
   $("#guide-title").text(newTitle);
 
   if (d.guide_url) {
-    console.log("UPDATE URL!");
     $(".top-guide-url").attr("href", d.guide_url);
     $(".top-guide-url").attr("href", d.guide_url);
   } else {
