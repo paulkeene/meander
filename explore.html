@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  .node circle {
+    cursor: pointer;
+    stroke: #e05103;
+    stroke-width: 1.5px;
+  }
+
+  .node text {
+    font: 10px sans-serif;
+    pointer-events: none;
+    text-anchor: middle;
+  }
+
+  .node-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 80px;
+    -webkit-border-radius: 80px;
+  }
+
+  line.link {
+    fill: none;
+    stroke: #BCBCBC;
+    stroke-width: 1.5px;
+  }
+
+  #top-guide {
+    max-height: 100%;
+    max-width: 100%;
+    -webkit-border-radius: 10px;
+  }
+
+  #wrapper {
+    width: 300px;
+    margin: 40px auto;
+  }
+
+  #svg-wrapper {
+    max-height: 100%;
+    max-width: 100%;
+    text-align: center;
+  }
+</style>
+<link rel="stylesheet" type="text/css" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" media="screen" />
+</head>
+<body>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+  <div id="wrapper">
+    <img id="top-guide" src="http://d74bwl3dcueqd.cloudfront.net/images/guide/00000000000000000000000000000000/300x294_ac.jpg" />
+  </div>
+  <div id="svg-wrapper"></div>
+
+<script>
+var width = 960,
+    height = 500,
+    t_width = 80,
+    t_height = 80,
+    root;
+
+var nodeCount = 1;
+
+var force = d3.layout.force()
+    .linkDistance(120)
+    .charge(-500)
+    .gravity(.05)
+    .friction(.85)
+    .size([width, height])
+    .on("tick", tick);
+
+var svg = d3.select("#svg-wrapper").append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+var link = svg.selectAll(".link"),
+    node = svg.selectAll(".node");
+
+d3.json("graph.json", function(error, json) {
+  root = json;
+  update();
+});
+
+function update() {
+  console.log("UPDATE");
+  var nodes = flatten(root),
+      links = d3.layout.tree().links(nodes);
+
+  console.log("NODES:");
+  console.log(nodes);
+
+  // Restart the force layout.
+  force
+      .nodes(nodes)
+      .links(links)
+      .start();
+
+  // Update links.
+  link = link.data(links, function(d) { return d.target.id; });
+
+  link.exit().remove();
+
+  link.enter().insert("line", ".node")
+      .attr("class", "link");
+
+  // Update nodes.
+  node = node.data(nodes, function(d) { return d.id; });
+
+  node.exit().remove();
+
+  var nodeEnter = node.enter().append("g")
+      .attr("class", "node")
+      .on("click", click)
+      .on("dblclick", dblclick)
+      .call(force.drag);
+
+  nodeEnter.append("foreignObject")
+      .attr("width", t_width)
+      .attr("height", t_height)
+    .append("xhtml:div")
+      .attr("class", "node-image")
+      .style("background", "url(http://placekitten.com/" + t_width + ") no-repeat")
+}
+
+function link_x(x) {
+  return x + Math.floor(t_width / 2);
+}
+
+function link_y(y) {
+  return y + Math.floor(t_height / 2);
+}
+
+function tick() {
+  link.attr("x1", function(d) { return link_x(d.source.x); })
+      .attr("y1", function(d) { return link_x(d.source.y); })
+      .attr("x2", function(d) { return link_x(d.target.x); })
+      .attr("y2", function(d) { return link_y(d.target.y); });
+
+  node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+}
+
+function color(d) {
+  return "#e05103";
+}
+
+// Toggle children on dblclick.
+function dblclick(d) {
+  if (d.children) {
+    return;
+  }
+  d.children = [];
+
+  for (var i = 0; i < 3; i++) {
+    d.children.push({"name": "Derp", "id": ++nodeCount});
+  }
+
+  update();
+}
+
+// Display node info on click.
+function click(d) {
+  if (d3.event.defaultPrevented) return; // ignore drag
+  var newImageUrl = "http://placekitten.com/300/294";
+  if (d.image_url) {
+    newImageUrl = d.image_url;
+  }
+  $("#top-guide").attr("src", newImageUrl);
+}
+
+// Returns a list of all nodes under the root.
+function flatten(root) {
+  var nodes = [], i = 0;
+
+  function recurse(node) {
+    if (node.children) node.children.forEach(recurse);
+    if (!node.id) node.id = ++i;
+    nodes.push(node);
+  }
+
+  recurse(root);
+  return nodes;
+}
+
+</script>
+</html>
