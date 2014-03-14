@@ -20,24 +20,33 @@ line.link {
   stroke-width: 1.5px;
 }
 
+.top-guide {
+  max-height: 100%;
+  max-width: 100%;
+  -webkit-border-radius: 10px;
+}
+
+#wrapper {
+  width: 300px;
+  margin: 40px auto;
+}
+
+#svg-wrapper {
+  max-height: 100%;
+  max-width: 100%;
+  text-align: center;
+}
+
 </style>
 <body>
-  <svg id="mySvg" width="80" height="80">
-    <defs id="mdef">
-      <pattern id="derpImage" x="0" y="0" height="80" width="80">
-        <image x="0" y="0" width="80" height="80" xlink:href="http://images.snapguide.com/images/guide/d950518a74b543a69a501c99d16ccb11/80x80_ac.jpg"></image>
-      </pattern>
-    </defs>
-  </svg>
-  <div id="wrapper" style="width:300px; margin:0 auto">
-    <img id="guideImage" style="max-height:100%; max-width:100%; /*border-style:dashed;*/ border-color:#BCBCBC; -webkit-border-radius: 10px;" src="http://d74bwl3dcueqd.cloudfront.net/images/guide/00000000000000000000000000000000/300x294_ac.jpg" />
+  <div id="wrapper">
+    <img class="top-guide" src="http://d74bwl3dcueqd.cloudfront.net/images/guide/00000000000000000000000000000000/300x294_ac.jpg" />
   </div>
-  <div id="svg-wrapper" style="max-height:100%; max-width:100%; text-align:center">
-  </div>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<script src="http://d3js.org/d3.v3.min.js"></script>
-<script>
+  <div id="svg-wrapper"></div>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
 
+<script>
 var width = 960,
     height = 500,
     root;
@@ -55,24 +64,6 @@ var force = d3.layout.force()
 var svg = d3.select("#svg-wrapper").append("svg")
     .attr("width", width)
     .attr("height", height);
-
-//var defs = svg.append("defs")
-//    .attr("id", "mdef");
-//
-//var pattern = defs.append("pattern")
-//    .attr("id", "derpImage")
-//    .attr("x", 0)
-//    .attr("y", 0)
-//    .attr("height", 80)
-//    .attr("width", 80)
-//
-//var image = defs.append("image")
-//    .attr("x", 0)
-//    .attr("y", 0)
-//    .attr("height", 80)
-//    .attr("width", 80)
-//    .attr("xlink:href", "http://images.snapguide.com/images/guide/d950518a74b543a69a501c99d16ccb11/80x80_ac.jpg")
-
 
 var link = svg.selectAll(".link"),
     node = svg.selectAll(".node");
@@ -117,38 +108,10 @@ function update() {
 
   nodeEnter.append("circle")
       .attr("class", "logo")
-      .attr("r", "40")
-      .style("fill", "url(#derpImage)");
+      .attr("r", "40");
 
-//  nodeEnter.append("image")
-//    .attr("class", "guideThumbnail")
-//    .attr("xlink:href", "http://images.snapguide.com/images/guide/d950518a74b543a69a501c99d16ccb11/80x80_ac.jpg")
-//    .attr("x", -8)
-//    .attr("y", -8)
-//    .attr("width", 80)
-//    .attr("height", 80);
-
-
-//  nodeEnter.append("image")
-//    .attr("xlink:href", "http://images.snapguide.com/images/guide/d950518a74b543a69a501c99d16ccb11/80x80_ac.jpg")
-//    .attr("x", 0)
-//    .attr("y", 0)
-//    .attr("width", 80)
-//    .attr("height", 80)
-//    .attr("clip-path", "url(#clippy)");
-
-
-
-//  nodeEnter.append("foreignObject")
-//    .attr("width", 80)
-//    .append("xhtml:div").attr("class", "guideThumbnail");
-
-//  nodeEnter.append("text")
-//      .attr("dy", ".35em")
-//      .text(function(d) { return d.name; });
-
-//  node.select("circle")
-//      .style("fill", color);
+  node.select("circle")
+      .style("fill", color);
 }
 
 function tick() {
