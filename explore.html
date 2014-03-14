@@ -36,10 +36,15 @@
     text-align: center;
   }
 
-  #top-guide {
+  #top-guide-img {
     max-height: 100%;
     max-width: 100%;
     -webkit-border-radius: 10px;
+  }
+
+  .top-guide-url, .top-guide-url:hover {
+    text-decoration: none;
+    color: #333;
   }
 
   #guide-title {
@@ -63,6 +68,10 @@
   h1 {
     position: absolute;
   }
+
+  a h1, a h1:hover {
+    color: #333;
+  }
 </style>
 <link rel="stylesheet" type="text/css" href="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" media="screen" />
 </head>
@@ -71,12 +80,11 @@
 <script src="http://d3js.org/d3.v3.min.js"></script>
   <div id="header">
     <div class="pull-left">
-      <h1>Meander</h1>
+      <a href="index.html"><h1>Meander</h1></a>
     </div>
-    <img id="top-guide" src="" />
+    <a class="top-guide-url"><img id="top-guide-img" src="" /></a>
   </div>
-  <div id="guide-title">
-  </div>
+  <a class="top-guide-url"><div id="guide-title"></div></a>
   <div id="svg-wrapper"></div>
 
 <script>
@@ -86,7 +94,8 @@ var width = 960,
     t_height = 45,
     root;
 
-var nodeCount = 1;
+var nodeCount = 1,
+    dblClickCount = 0;
 
 var force = d3.layout.force()
     .linkDistance(120)
@@ -103,7 +112,7 @@ var svg = d3.select("#svg-wrapper").append("svg")
 var link = svg.selectAll(".link"),
     node = svg.selectAll(".node");
 
-d3.json("graph.json", function(error, json) {
+d3.json("root.json", function(error, json) {
   root = json;
   update();
 });
@@ -146,7 +155,15 @@ function update() {
       .attr("height", t_height)
     .append("xhtml:div")
       .attr("class", "node-image")
-      .style("background", "url(http://placekitten.com/" + t_width + ") no-repeat")
+      //.style("background", "url(http://placekitten.com/" + t_width + ") no-repeat")
+      .style("background", function(d) { return "url(" + thumbnail_url(d) + ") no-repeat"});
+}
+
+function thumbnail_url(d) {
+  if (d.thumbnail_url) {
+    return d.thumbnail_url;
+  }
+  return "http://placekitten.com/" + t_width;
 }
 
 function link_x(x) {
@@ -177,11 +194,40 @@ function dblclick(d) {
   }
   d.children = [];
 
-  for (var i = 0; i < 3; i++) {
-    d.children.push({"name": "Derp", "id": ++nodeCount});
+  dblClickCount++;
+  if (dblClickCount == 1) {
+    $.getJSON("first_expand.json")
+      .done(function(data) {
+        for (var i = 0; i < 3; i++) {
+          data[i]["id"] = ++nodeCount;
+          d.children.push(data[i]);
+          update();
+        }
+      });
+  } else if (dblClickCount == 2) {
+    $.getJSON("second_expand.json")
+      .done(function(data) {
+        for (var i = 0; i < 3; i++) {
+          data[i]["id"] = ++nodeCount;
+          d.children.push(data[i]);
+          update();
+        }
+      });
+  } else if (dblClickCount == 3) {
+    $.getJSON("third_expand.json")
+      .done(function(data) {
+        for (var i = 0; i < 3; i++) {
+          data[i]["id"] = ++nodeCount;
+          d.children.push(data[i]);
+          update();
+        }
+      });
+  } else {
+    for (var i = 0; i < 3; i++) {
+      d.children.push({"name": "Derp", "id": ++nodeCount});
+    }
+    update();
   }
-
-  update();
 }
 
 // Display node info on click.
@@ -191,12 +237,20 @@ function click(d) {
   if (d.image_url) {
     newImageUrl = d.image_url;
   }
-  var newTitle = "Derp!";
+  var newTitle = "Meow!";
   if (d.title) {
     newTitle = d.title;
   }
-  $("#top-guide").attr("src", newImageUrl);
+  $("#top-guide-img").attr("src", newImageUrl);
   $("#guide-title").text(newTitle);
+
+  if (d.guide_url) {
+    console.log("UPDATE URL!");
+    $(".top-guide-url").attr("href", d.guide_url);
+    $(".top-guide-url").attr("href", d.guide_url);
+  } else {
+    $(".top-guide-url").removeAttr("href");
+  }
 }
 
 // Returns a list of all nodes under the root.
