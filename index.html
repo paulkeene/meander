@@ -20,7 +20,7 @@ line.link {
   stroke-width: 1.5px;
 }
 
-.top-guide {
+#top-guide {
   max-height: 100%;
   max-width: 100%;
   -webkit-border-radius: 10px;
@@ -40,7 +40,7 @@ line.link {
 </style>
 <body>
   <div id="wrapper">
-    <img class="top-guide" src="http://d74bwl3dcueqd.cloudfront.net/images/guide/00000000000000000000000000000000/300x294_ac.jpg" />
+    <img id="top-guide" src="http://d74bwl3dcueqd.cloudfront.net/images/guide/00000000000000000000000000000000/300x294_ac.jpg" />
   </div>
   <div id="svg-wrapper"></div>
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
@@ -148,7 +148,7 @@ function click(d) {
   if (d.image_url) {
     newImageUrl = d.image_url;
   }
-  $("#guideImage").attr("src", newImageUrl);
+  $("#top-guide").attr("src", newImageUrl);
 }
 
 // Returns a list of all nodes under the root.
